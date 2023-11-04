@@ -1,68 +1,58 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2706
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+# Observations and Analysis
 
-\f0\fs24 \cf0 # Observations\
-\
-## LM_full\
-Trained this model on all of the data and tested it on the toxic subset of the test data, non-toxic subset, and the complete test data. Observed the following when trained on all the train data:\
-\
-| Sl no | Test Data Set                | Average MLE score |\
-|-------|-----------------------------|-------------------|\
-| 1.    | The complete test Dataset   | 3.29              |\
-| 2.    | Toxic Dataset               | 1.73              |\
-| 3.    | Non-Toxic Dataset           | 3.65              |\
-\
-**Observations and Analysis:**\
-- Based on the above observations, we can see that when the language model is trained on the complete train dataset, it gives the highest Average MLE score for the Non-Toxic Dataset.\
-- This test dataset contains a majority of non-toxic comments.\
-- The train dataset also contains a majority of non-toxic comments, which is why the train dataset (LM_full) gives the best average MLE score on the non-toxic test dataset.\
-\
-## LM_not\
-Trained this model on a subset of the train data with labels 0 (non-toxic). Tested it on the toxic subset of the test data, non-toxic subset, and the complete test data. Observed the following:\
-\
-| Sl no | Test Data Set                | Average MLE score |\
-|-------|-----------------------------|-------------------|\
-| 1.    | The complete test Dataset   | 3.21              |\
-| 2.    | Toxic Dataset               | 1.23              |\
-| 3.    | Non-Toxic Dataset           | 3.67              |\
-\
-**Observations and Analysis:**\
-- We can observe that when the model is trained on the non-toxic subset, it gives the best average MLE score for the non-toxic test dataset. This is an observation I had expected since both train and test datasets in this case contain non-toxic comments.\
-- The complete test Dataset has a slightly less average MLE score compared to the Non-Toxic test Dataset due to the presence of toxic comments in it.\
-\
-## LM_toxic\
-Trained this model on the toxic subset of the train data with labels 1 for the toxic field. Tested it on the toxic subset of the test data, non-toxic subset, and the complete test data. Observed the following:\
-\
-| Sl no | Test Data Set                | Average MLE score |\
-|-------|-----------------------------|-------------------|\
-| 1.    | The complete test Dataset   | 2.50              |\
-| 2.    | Toxic Dataset               | 1.82              |\
-| 3.    | Non-Toxic Dataset           | 2.67              |\
-\
-**Observations and Analysis:**\
-- Here, the toxic train dataset performs better with the complete test dataset and the Non-Toxic test Dataset as compared to the Toxic test Dataset. This was not an expected output.\
-- One probable reason could be that toxic words might not depend on the previous word. Since we use a bigram model here, the toxic test Dataset probably has the lowest MLE score always. A unigram model might perform better and give a higher score since unigram models do not depend on the previous word.\
-\
-## Additional Analysis\
-I conducted an additional analysis to check if the unigram model performs better when toxic train data is tested on toxic test data. I trained a unigram model using only toxic data and tested it on all three datasets:\
-\
-| Sl no | Test Data Set                | Average MLE score |\
-|-------|-----------------------------|-------------------|\
-| 1.    | The complete test Dataset   | 0.25              |\
-| 2.    | Toxic Dataset               | 0.14              |\
-| 3.    | Non-Toxic Dataset           | 0.26              |\
-\
-**Observations and Analysis:**\
-- The toxic train dataset again gives a lesser Average MLE score for the Toxic test Dataset compared to the other two datasets. There could be two possible cases:\
-  1. Toxic words do not depend on the previous context of the word, which is why we get a lower MLE score when a bigram model is used on the toxic test dataset.\
-  2. Also, individually in a comment of this dataset, the toxic words are less frequent compared to other words, which is why the unigram model also gives a lesser average MLE score for the toxic test dataset compared to the other two datasets.\
-\
-## Summary and Analysis\
-- While calculating the MLE score, we smoothened very small values to avoid errors and long execution times. If `lm.score` was a very small value less than `1e-6`, we automatically converted these values to 0.\
-- We observed a deviation from the expected output while testing bigram models using toxic data.\
-- We observed that when toxic data is used to train a bigram model, it gives a smaller Average MLE score on toxic test data compared to the entire test dataset and non-toxic test dataset. We assumed that this could be the case since toxic words do not depend on previous context. While testing the unigram model, we also got a smaller average MLE score while testing toxic train data on toxic test data.\
-}
+For this implementation, Twitter 25-word embeddings were used. The choice of these embeddings was made to prevent long computations and kernel failures due to increased layers in the model. The maximum comment length was set to 40 to reduce the computational load.
+
+## Observations
+
+### Twitter 25 Embeddings
+
+| Sl.no | Model              | Accuracy | Precision | Recall | F1-score |
+|-------|--------------------|----------|-----------|--------|----------|
+| 1.    | 1-layer MLP model  | 88.94    | 41.3      | 38.4   | 39.8     |
+| 2.    | 2-layer MLP model  | 88.69    | 41.07     | 43.26  | 42.14    |
+| 3.    | 3-layer MLP model  | 89.11    | 42.51     | 40.70  | 41.59    |
+
+## Analysis
+
+- All three models perform similarly with slight variations in accuracy.
+- The 3-layer MLP model achieves the highest accuracy, but other scores like precision, recall, and F1-score indicate the 2-layer MLP model performs best.
+- The 2-layer MLP model has the highest recall (43.26%), and the 3-layer MLP model has the highest precision (42.51%).
+- The overall best performer is the 2-layer MLP model with the highest F1-score.
+
+## Individual Model Analysis
+
+### 1-layer MLP model:
+
+- Precision: 41.3%
+- Recall: 38.4%
+- F1-score: 39.8%
+
+This model has the lowest performance among the three.
+
+### 2-layer MLP model:
+
+- Precision: 41.07%
+- Recall: 43.26%
+- F1-score: 42.14%
+
+This model performs the best with the highest F1-score.
+
+### 3-layer MLP model:
+
+- Precision: 42.51%
+- Recall: 40.70%
+- F1-score: 41.59%
+
+The 3-layer MLP model has the highest precision.
+
+## Accuracy of Toxic and Non-toxic Labels Separately
+
+- Toxic class accuracy: 38.44% (1-layer), 43.27% (2-layer), 40.71% (3-layer)
+- Non-toxic class accuracy: 94.25% (1-layer), 93.47% (2-layer), 94.20% (3-layer)
+
+## Additional Observations
+
+- Each run of the MLP models resulted in different scores due to random weight initialization.
+- Setting the `random_state` parameter in the MLP classifier can mitigate this randomness.
+- Generally, models with more layers performed better in predicting the toxic class over multiple runs.
+
